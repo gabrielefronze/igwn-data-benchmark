@@ -1,0 +1,3 @@
+[submodule "virgo-htc-wrapper"]
+	path = virgo-htc-wrapper
+	url = https://github.com/gabrielefronze/virgo-htc-wrapper.git
