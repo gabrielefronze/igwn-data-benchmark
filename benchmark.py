@@ -14,7 +14,7 @@ from fastlog.python.fastlog import *
 from file_test_utils import *
 from ramdisk import ramDisk
 
-set_log_level(INFO)
+set_log_level(DEBUG)
 
 ramdiskPath = "/mnt/igwn-benchmark-ramdisk"
 targetDirectory = "/tmp/igwn-benchmark"
@@ -139,7 +139,7 @@ def benchmark(useRamdisk = False, blocksize = 1024, loops = 1):
   elif not is_directory(targetDirectory):
     os.mkdir(targetDirectory)
 
-  testfiles = ["./test_file"]
+  testfiles = ["test_file"]
 
   readBenchmark(testfiles, pattern='random', blocksize=blocksize, loops=loops)
   readBenchmark(testfiles, pattern='sequential', blocksize=blocksize, loops=loops)
@@ -156,8 +156,21 @@ def benchmark(useRamdisk = False, blocksize = 1024, loops = 1):
 import argparse
 
 if __name__ == "__main__":
-  blocksize = 1024
-  loops = 1
+  parser = argparse.ArgumentParser(description="Measure file access and read performances.")
+  parser.add_argument("-bs", "--blocksize", type=int, help='Block size to be used for the tests.')
+  parser.add_argument("-l", "--loops", type=int, help='Number of tests to perform for each measure.')
+
+  args = parser.parse_args()
+
+  if args.blocksize is not None:
+    blocksize = args.blocksize
+  else:
+    blocksize = 1024
+
+  if args.loops is not None:
+    loops = args.bs
+  else:
+    loops = 1
   fastlog(UI, "Performing benchmark with blocksize {} and {} tests of each kind.".format(blocksize, loops))
   benchmark(blocksize=blocksize, loops=loops)
   fastlog(UI, "Done! Bye bye")
