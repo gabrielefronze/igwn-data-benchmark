@@ -51,7 +51,7 @@ def readBenchmark(filesList, loops=1, blocksize=512, pattern='random'):
       fastlog(DEBUG, "Starting loop {}".format(loop))
       readfile = os.open(file, os.O_RDONLY, 0o777)
       for i, offset in enumerate(offsets, 1):
-        if i%1000 == 0:
+        if i%100000 == 0:
           fastlog(DEBUG, "Offset {}/{}".format(i,len(offsets)))
         start = time.time()
         os.lseek(readfile, offset, os.SEEK_SET)
@@ -101,7 +101,7 @@ def IOPSBenchmark(filesList, loops=1, blocksize=512, pattern='random', ntests=10
       count = 0
       start = time.time()
       for i, offset in enumerate(offsets, 1):
-        if i%1000 == 0:
+        if i%100000 == 0:
           fastlog(DEBUG, "Offset {}/{}".format(i,len(offsets)))
         os.lseek(fh, offset, os.SEEK_SET)
         blockdata = os.read(fh, blocksize)
