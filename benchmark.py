@@ -14,7 +14,7 @@ from fastlog.python.fastlog import *
 from file_test_utils import *
 from ramdisk import ramDisk
 
-set_log_level(DEBUG)
+set_log_level(INFO)
 
 ramdiskPath = "/mnt/igwn-benchmark-ramdisk"
 targetDirectory = "/tmp/igwn-benchmark"
@@ -49,7 +49,7 @@ def readBenchmark(filesList, loops=1, blocksize=512, pattern='random'):
 
     for loop in range(loops):
       fastlog(DEBUG, "Starting loop {}".format(loop))
-      readfile = os.open(file, os.O_RDONLY, 0o777)
+      readfile = os.open(file, os.O_RDONLY | os.O_DSYNC, 0o777)
       for i, offset in enumerate(offsets, 1):
         if i%100000 == 0:
           fastlog(DEBUG, "Offset {}/{}".format(i,len(offsets)))
@@ -73,7 +73,7 @@ def readBenchmark(filesList, loops=1, blocksize=512, pattern='random'):
   return bandwidthMeasurements
 
 
-def IOPSBenchmark(filesList, loops=1, blocksize=512, pattern='random', ntests=1000000):
+def IOPSBenchmark(filesList, loops=1, blocksize=512, pattern='random'):
   sectorsize = 4096
 
   IOPSMeasurements = []
@@ -89,14 +89,14 @@ def IOPSBenchmark(filesList, loops=1, blocksize=512, pattern='random', ntests=10
   for loop in range(loops):
     fastlog(DEBUG, "Starting loop {}".format(loop))
     for file in filesList:
-      fh = os.open(file, os.O_RDONLY, 0o777)
+      fh = os.open(file, os.O_RDONLY | os.O_DSYNC, 0o777)
+      blockscount = math.floor(os.path.getsize(file)/blocksize)
 
       if pattern=='random':
-        blockscount = math.floor(os.path.getsize(file)/blocksize)
-        offsets = list(range(0, blockscount * blocksize, ntests))
+        offsets = list(range(0, blockscount * blocksize, blocksize))
         shuffle(offsets)
       elif pattern=='sequential':
-        offsets = [0] * ntests
+        offsets = [0] * blockscount
 
       count = 0
       start = time.time()
@@ -141,10 +141,10 @@ def benchmark(useRamdisk = False):
 
   testfiles = ["test_file"]
 
-  readBenchmark(testfiles, pattern='random', blocksize=512, loops=3)
-  readBenchmark(testfiles, pattern='sequential', blocksize=512, loops=3)
-  IOPSBenchmark(testfiles, pattern='random', blocksize=512, loops=3)
-  IOPSBenchmark(testfiles, pattern='sequential', blocksize=512, loops=3)
+  readBenchmark(testfiles, pattern='random', blocksize=1024, loops=3)
+  readBenchmark(testfiles, pattern='sequential', blocksize=1024, loops=3)
+  IOPSBenchmark(testfiles, pattern='random', blocksize=1024, loops=3)
+  IOPSBenchmark(testfiles, pattern='sequential', blocksize=1024, loops=3)
 
   if useRamdisk:
     fastlog(INFO, "Unmounting ramdisk... ")
