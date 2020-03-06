@@ -17,6 +17,5 @@ class ramDisk:
 
     if is_directory(self.path):
       shutil.rmtree(self.path)
-      os.rmdir(self.path)
 
     self.path = ''
