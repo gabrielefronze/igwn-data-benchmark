@@ -70,7 +70,7 @@ def readBenchmark(filesList, loops=1, blocksize=512, pattern='random'):
   return bandwidthMeasurements
 
 
-def IOPSBenchmark(filesList, loops=1, blocksize=4096, pattern='random', ntests=1000000):
+def IOPSBenchmark(filesList, loops=1, blocksize=512, pattern='random', ntests=1000000):
   sectorsize = 4096
 
   IOPSMeasurements = []
@@ -133,10 +133,12 @@ def benchmark(useRamdisk = False):
   elif not is_directory(targetDirectory):
     os.mkdir(targetDirectory)
 
-  readBenchmark(["test_file"], pattern='random', loops=3)
-  readBenchmark(["test_file"], pattern='sequential', loops=3)
-  IOPSBenchmark(["test_file"], pattern='random', loops=3)
-  IOPSBenchmark(["test_file"], pattern='sequential', loops=3)
+  testfiles = ["test_file"]
+
+  readBenchmark(testfiles, pattern='random', blocksize=512, loops=3)
+  readBenchmark(testfiles, pattern='sequential', blocksize=512, loops=3)
+  IOPSBenchmark(testfiles, pattern='random', blocksize=512, loops=3)
+  IOPSBenchmark(testfiles, pattern='sequential', blocksize=512, loops=3)
 
   if useRamdisk:
     fastlog(INFO, "Unmounting ramdisk... ")
