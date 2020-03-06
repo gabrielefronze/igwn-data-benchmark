@@ -49,7 +49,7 @@ def readBenchmark(filesList, loops=1, blocksize=512, pattern='random'):
 
     for loop in range(loops):
       fastlog(DEBUG, "Starting loop {}".format(loop))
-      readfile = os.open(file, os.O_RDONLY | os.O_DSYNC, 0o777)
+      readfile = os.open(file, os.O_RDONLY, 0o777)
       for i, offset in enumerate(offsets, 1):
         if i%100000 == 0:
           fastlog(DEBUG, "Offset {}/{}".format(i,len(offsets)))
@@ -89,7 +89,7 @@ def IOPSBenchmark(filesList, loops=1, blocksize=512, pattern='random'):
   for loop in range(loops):
     fastlog(DEBUG, "Starting loop {}".format(loop))
     for file in filesList:
-      fh = os.open(file, os.O_RDONLY | os.O_DSYNC, 0o777)
+      fh = os.open(file, os.O_RDONLY, 0o777)
       blockscount = math.floor(os.path.getsize(file)/blocksize)
 
       if pattern=='random':
@@ -139,12 +139,12 @@ def benchmark(useRamdisk = False):
   elif not is_directory(targetDirectory):
     os.mkdir(targetDirectory)
 
-  testfiles = ["test_file"]
+  testfiles = ["./test_file"]
 
-  readBenchmark(testfiles, pattern='random', blocksize=1024, loops=3)
-  readBenchmark(testfiles, pattern='sequential', blocksize=1024, loops=3)
-  IOPSBenchmark(testfiles, pattern='random', blocksize=1024, loops=3)
-  IOPSBenchmark(testfiles, pattern='sequential', blocksize=1024, loops=3)
+  readBenchmark(testfiles, pattern='random', blocksize=128, loops=1)
+  readBenchmark(testfiles, pattern='sequential', blocksize=128, loops=1)
+  IOPSBenchmark(testfiles, pattern='random', blocksize=128, loops=1)
+  IOPSBenchmark(testfiles, pattern='sequential', blocksize=128, loops=1)
 
   if useRamdisk:
     fastlog(INFO, "Unmounting ramdisk... ")
