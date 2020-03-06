@@ -14,7 +14,7 @@ from fastlog.python.fastlog import *
 from file_test_utils import *
 from ramdisk import ramDisk
 
-set_log_level(INFO)
+set_log_level(DEBUG)
 
 ramdiskPath = "/mnt/igwn-benchmark-ramdisk"
 targetDirectory = "/tmp/igwn-benchmark"
@@ -48,8 +48,11 @@ def readBenchmark(filesList, loops=1, blocksize=512, pattern='random'):
     partialMeasurements = []
 
     for loop in range(loops):
+      fastlog(DEBUG, "Starting loop {}".format(loop))
       readfile = os.open(file, os.O_RDONLY, 0o777)
       for i, offset in enumerate(offsets, 1):
+        if i%1000 == 0:
+          fastlog(DEBUG, "Offset {}/{}".format(i,len(offsets)))
         start = time.time()
         os.lseek(readfile, offset, os.SEEK_SET)
         buff = os.read(readfile, blocksize)
@@ -84,6 +87,7 @@ def IOPSBenchmark(filesList, loops=1, blocksize=512, pattern='random', ntests=10
     return
 
   for loop in range(loops):
+    fastlog(DEBUG, "Starting loop {}".format(loop))
     for file in filesList:
       fh = os.open(file, os.O_RDONLY, 0o777)
 
@@ -97,9 +101,11 @@ def IOPSBenchmark(filesList, loops=1, blocksize=512, pattern='random', ntests=10
       count = 0
       start = time.time()
       for i, offset in enumerate(offsets, 1):
-          os.lseek(fh, offset, os.SEEK_SET)
-          blockdata = os.read(fh, blocksize)
-          count += 1
+        if i%1000 == 0:
+          fastlog(DEBUG, "Offset {}/{}".format(i,len(offsets)))
+        os.lseek(fh, offset, os.SEEK_SET)
+        blockdata = os.read(fh, blocksize)
+        count += 1
               
       elapsed = time.time() - start
 
