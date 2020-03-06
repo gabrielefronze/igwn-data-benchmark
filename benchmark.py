@@ -126,7 +126,7 @@ def latencyBenchmark(filesList, loops=1):
       fastlog(DEBUG, out)
 
 
-def benchmark(useRamdisk = False):
+def benchmark(useRamdisk = False, blocksize = 1024, loops = 1):
   if useRamdisk:
     fastlog(INFO, "Creating ramdisk... ")
     
@@ -141,10 +141,10 @@ def benchmark(useRamdisk = False):
 
   testfiles = ["./test_file"]
 
-  readBenchmark(testfiles, pattern='random', blocksize=128, loops=1)
-  readBenchmark(testfiles, pattern='sequential', blocksize=128, loops=1)
-  IOPSBenchmark(testfiles, pattern='random', blocksize=128, loops=1)
-  IOPSBenchmark(testfiles, pattern='sequential', blocksize=128, loops=1)
+  readBenchmark(testfiles, pattern='random', blocksize=blocksize, loops=loops)
+  readBenchmark(testfiles, pattern='sequential', blocksize=blocksize, loops=loops)
+  IOPSBenchmark(testfiles, pattern='random', blocksize=blocksize, loops=loops)
+  IOPSBenchmark(testfiles, pattern='sequential', blocksize=blocksize, loops=loops)
 
   if useRamdisk:
     fastlog(INFO, "Unmounting ramdisk... ")
@@ -153,7 +153,11 @@ def benchmark(useRamdisk = False):
   elif is_directory(targetDirectory):
     shutil.rmtree(targetDirectory)
 
-
+import argparse
 
 if __name__ == "__main__":
-  benchmark()
+  blocksize = 1024
+  loops = 1
+  fastlog(UI, "Performing benchmark with blocksize {} and {} tests of each kind.".format(blocksize, loops))
+  benchmark(blocksize=blocksize, loops=loops)
+  fastlog(UI, "Done! Bye bye")
