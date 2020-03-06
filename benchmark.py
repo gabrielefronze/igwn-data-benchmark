@@ -168,7 +168,7 @@ if __name__ == "__main__":
     blocksize = 1024
 
   if args.loops is not None:
-    loops = args.bs
+    loops = args.loops
   else:
     loops = 1
   fastlog(UI, "Performing benchmark with blocksize {} and {} tests of each kind.".format(blocksize, loops))
