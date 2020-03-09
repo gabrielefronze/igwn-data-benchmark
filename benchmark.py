@@ -49,7 +49,7 @@ def readBenchmark(filesList, loops=1, blocksize=512, pattern='random'):
 
     for loop in range(loops):
       fastlog(DEBUG, "Starting loop {}".format(loop))
-      readfile = os.open(file, os.O_RDONLY, 0o777)
+      readfile = os.open(file, os.O_RDONLY | os.O_DSYNC, 0o777)
       for i, offset in enumerate(offsets, 1):
         if i%100000 == 0:
           fastlog(DEBUG, "Offset {}/{}".format(i,len(offsets)))
@@ -89,7 +89,7 @@ def IOPSBenchmark(filesList, loops=1, blocksize=512, pattern='random'):
   for loop in range(loops):
     fastlog(DEBUG, "Starting loop {}".format(loop))
     for file in filesList:
-      fh = os.open(file, os.O_RDONLY, 0o777)
+      fh = os.open(file, os.O_RDONLY | os.O_DSYNC, 0o777)
       blockscount = math.floor(os.path.getsize(file)/blocksize)
 
       if pattern=='random':
@@ -126,7 +126,7 @@ def latencyBenchmark(filesList, loops=1):
       fastlog(DEBUG, out)
 
 
-def benchmark(useRamdisk = False, blocksize = 1024, loops = 1):
+def benchmark(useRamdisk = False, blocksize = 1024, loops = 1, file = None):
   if useRamdisk:
     fastlog(INFO, "Creating ramdisk... ")
     
@@ -139,7 +139,10 @@ def benchmark(useRamdisk = False, blocksize = 1024, loops = 1):
   elif not is_directory(targetDirectory):
     os.mkdir(targetDirectory)
 
-  testfiles = ["test_file"]
+  if file is not None:
+    testfiles = [file]
+  else:
+    testfiles = ["test_file"]
 
   readBenchmark(testfiles, pattern='random', blocksize=blocksize, loops=loops)
   readBenchmark(testfiles, pattern='sequential', blocksize=blocksize, loops=loops)
@@ -159,7 +162,7 @@ if __name__ == "__main__":
   parser = argparse.ArgumentParser(description="Measure file access and read performances.")
   parser.add_argument("-bs", "--blocksize", type=int, help='Block size to be used for the tests.')
   parser.add_argument("-l", "--loops", type=int, help='Number of tests to perform for each measure.')
-
+  parser.add_argument("-f", "--file", type=str, help='Input file for the tests.')
   args = parser.parse_args()
 
   if args.blocksize is not None:
