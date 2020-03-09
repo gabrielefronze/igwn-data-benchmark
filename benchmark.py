@@ -16,6 +16,15 @@ from ramdisk import ramDisk
 
 set_log_level(DEBUG)
 
+from sys import platform
+readOptions = os.O_RDONLY
+if platform == "linux" or platform == "linux2":
+    readOptions |= os.O_DIRECT | os.O_DSYNC
+elif platform == "darwin":
+    readOptions |= os.O_DSYNC
+elif platform == "win32":
+    readOptions |= os.O_DIRECT | os.O_DSYNC
+
 ramdiskPath = "/mnt/igwn-benchmark-ramdisk"
 targetDirectory = "/tmp/igwn-benchmark"
 sizePrefixes = ['','K','M','G','T','E','P']
@@ -49,7 +58,8 @@ def readBenchmark(filesList, loops=1, blocksize=512, pattern='random'):
 
     for loop in range(loops):
       fastlog(DEBUG, "Starting loop {}".format(loop))
-      readfile = os.open(file, os.O_RDONLY | os.O_DSYNC, 0o777)
+      global readOptions
+      readfile = os.open(file, readOptions, 0o777)
       for i, offset in enumerate(offsets, 1):
         if i%100000 == 0:
           fastlog(DEBUG, "Offset {}/{}".format(i,len(offsets)))
@@ -89,7 +99,8 @@ def IOPSBenchmark(filesList, loops=1, blocksize=512, pattern='random'):
   for loop in range(loops):
     fastlog(DEBUG, "Starting loop {}".format(loop))
     for file in filesList:
-      fh = os.open(file, os.O_RDONLY | os.O_DSYNC, 0o777)
+      global readOptions
+      fh = os.open(file, readOptions, 0o777)
       blockscount = math.floor(os.path.getsize(file)/blocksize)
 
       if pattern=='random':
