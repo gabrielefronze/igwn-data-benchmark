@@ -139,10 +139,7 @@ def benchmark(useRamdisk = False, blocksize = 1024, loops = 1, file = None):
   elif not is_directory(targetDirectory):
     os.mkdir(targetDirectory)
 
-  if file is not None:
-    testfiles = [file]
-  else:
-    testfiles = ["test_file"]
+  testfiles = [file]
 
   readBenchmark(testfiles, pattern='random', blocksize=blocksize, loops=loops)
   readBenchmark(testfiles, pattern='sequential', blocksize=blocksize, loops=loops)
@@ -174,6 +171,12 @@ if __name__ == "__main__":
     loops = args.loops
   else:
     loops = 1
+
+  if args.file is not None:
+    file = args.file
+  else:
+    file = "test_file"
+
   fastlog(UI, "Performing benchmark with blocksize {} and {} tests of each kind.".format(blocksize, loops))
-  benchmark(blocksize=blocksize, loops=loops)
+  benchmark(blocksize=blocksize, loops=loops, file=file)
   fastlog(UI, "Done! Bye bye")
