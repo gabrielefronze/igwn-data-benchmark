@@ -9,6 +9,7 @@ import math
 import time
 import random
 from random import shuffle
+import types
 
 from fastlog.python.fastlog import *
 from file_test_utils import *
@@ -137,7 +138,7 @@ def latencyBenchmark(filesList, loops=1):
       fastlog(DEBUG, out)
 
 
-def benchmark(useRamdisk = False, blocksize = 1024, loops = 1, file = None):
+def benchmark(mode, useRamdisk = False, blocksize = 1024, loops = 1, file = None):
   if useRamdisk:
     fastlog(INFO, "Creating ramdisk... ")
     
@@ -150,12 +151,23 @@ def benchmark(useRamdisk = False, blocksize = 1024, loops = 1, file = None):
   elif not is_directory(targetDirectory):
     os.mkdir(targetDirectory)
 
-  testfiles = [file]
+  if isinstance(file, list):
+    testfiles = file
+  else:
+    testfiles = [file]
 
-  readBenchmark(testfiles, pattern='random', blocksize=blocksize, loops=loops)
-  readBenchmark(testfiles, pattern='sequential', blocksize=blocksize, loops=loops)
-  IOPSBenchmark(testfiles, pattern='random', blocksize=blocksize, loops=loops)
-  IOPSBenchmark(testfiles, pattern='sequential', blocksize=blocksize, loops=loops)
+  if "readrand" in mode:
+    fastlog(DEBUG, mode)
+    readBenchmark(testfiles, pattern='random', blocksize=blocksize, loops=loops)
+  if "readseq" in mode:
+    fastlog(DEBUG, mode)
+    readBenchmark(testfiles, pattern='sequential', blocksize=blocksize, loops=loops)
+  if "iopsrand" in mode:
+    fastlog(DEBUG, mode)
+    IOPSBenchmark(testfiles, pattern='random', blocksize=blocksize, loops=loops)
+  if "iopsseq" in mode:
+    fastlog(DEBUG, mode)
+    IOPSBenchmark(testfiles, pattern='sequential', blocksize=blocksize, loops=loops)
 
   if useRamdisk:
     fastlog(INFO, "Unmounting ramdisk... ")
@@ -171,6 +183,8 @@ if __name__ == "__main__":
   parser.add_argument("-bs", "--blocksize", type=int, help='Block size to be used for the tests.')
   parser.add_argument("-l", "--loops", type=int, help='Number of tests to perform for each measure.')
   parser.add_argument("-f", "--file", type=str, help='Input file for the tests.')
+  modes = ["readrand","readseq","iopsrand","iopsseq","all"]
+  parser.add_argument("-m", "--mode", type=str, help='Test to perform. Available choices {}.'.format(modes))
   args = parser.parse_args()
 
   if args.blocksize is not None:
@@ -188,6 +202,12 @@ if __name__ == "__main__":
   else:
     file = "test_file"
 
-  fastlog(UI, "Performing benchmark with blocksize {} and {} tests of each kind.".format(blocksize, loops))
-  benchmark(blocksize=blocksize, loops=loops, file=file)
-  fastlog(UI, "Done! Bye bye")
+  if args.mode is not None and args.mode in modes:
+    if args.mode=="all":
+      args.mode = ','.join(modes)
+
+    fastlog(UI, "Performing benchmark with blocksize {} and {} tests of each kind.".format(blocksize, loops))
+    benchmark(args.mode, blocksize=blocksize, loops=loops, file=file)
+    fastlog(UI, "Done! Bye bye")
+  else:
+    fastlog(ERROR, "Invalid mode. Choose one of {}. Aborting!".format(modes))
